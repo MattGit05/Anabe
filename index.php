@@ -1,12 +1,10 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.html");
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
     exit();
 }
 ?>
-
-
 
 
 <!DOCTYPE html>
@@ -17,23 +15,56 @@ if (!isset($_SESSION['user_id'])) {
     <title>Home Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        *{
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
+        header {
+            background-color: #212529;
+            color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #bb2d3b;
+            color: #fff;
+        }
     </style>
+    
 </head>
 <body>
-    <div class="container">
+
+    <!-- ===== HEADER SECTION ===== -->
+    <header>
+        <h1>CRUD APPLICATION USING PHP AND MYSQL</h1>
+        <a href="logout.php" class="logout-btn">Logout</a>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container mt-4">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="text-center p-5 bg-dark text-white mb-3">CRUD APPLICATION USING PHP AND MYSQL</h1>
- 
-                  <div class="d-flex justify-content-end mb-3">
-                     <button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
-                 </div>
-
 
                 <?php
                 // Display success message
@@ -57,9 +88,10 @@ if (!isset($_SESSION['user_id'])) {
                     <h3 class="text-left">All Students</h3>
                     <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#studentModal">Create</a>
                 </div>
+
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-hover">
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
@@ -83,27 +115,47 @@ if (!isset($_SESSION['user_id'])) {
                                     <td><?php echo $row['id']; ?></td>
                                     <td><?php echo $row['first_name'] . ' ' . $row['last_name']; ?></td>
                                     <td><?php echo $row['age']; ?></td>
-                                    <td></td>
+                                    <td>
+                                        <!-- You can add Edit/Delete buttons here later -->
+                                    </td>
                                 </tr>
-                            <?php
-                                }
-                            ?>
+                            <?php } ?>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
     <?php include 'component/modal.php'; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      function confirmLogout() {
-        const confirmation = confirm("Are you sure you want to logout?");
-          if (confirmation) {
-        window.location.href = "logout.php";
-           }
-         }
-      </script>
+  // ===== Show logout success message =====
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('logout') === 'success') {
+    // Create alert element
+    const alertBox = document.createElement('div');
+    alertBox.className = 'alert alert-success text-center fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow';
+    alertBox.style.zIndex = '1055';
+    alertBox.textContent = 'You have logged out successfully. Redirecting...';
+
+    // Add to body
+    document.body.appendChild(alertBox);
+
+    // Fade out after 3 seconds
+    setTimeout(() => {
+      alertBox.classList.remove('show');
+      alertBox.classList.add('fade');
+      setTimeout(() => alertBox.remove(), 500);
+    }, 3000);
+
+    // Redirect after 4 seconds (adjust if needed)
+    setTimeout(() => {
+      window.location.href = "login.php"; // 👈 change this to your actual login page
+    }, 4000);
+  }
+</script>
 
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </html>

@@ -2,6 +2,8 @@
 session_start();
 session_unset();
 session_destroy();
-header("Location: index.html");
+
+// Redirect back to login page with success message
+header("Location: index.php?logout=success");
 exit();
 ?>

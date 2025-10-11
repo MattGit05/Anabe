@@ -1,5 +1,5 @@
 <?php
-include '../db_config/dbconn.php';
+include_once '../db_config/dbconn.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Get POST data

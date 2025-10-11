@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$database = "student_crud"; // make sure this exists in phpMyAdmin
+$database = "added_student";
 
 $connection = new mysqli($servername, $username, $password, $database);
 

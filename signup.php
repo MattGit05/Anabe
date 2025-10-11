@@ -1,36 +1,48 @@
+
 <?php
-include_once(__DIR__ . '/db_config/dbconn.php');
+session_start();
+include 'db_config/dbconn.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = mysqli_real_escape_string($connection, $_POST['username']);
+    $email = mysqli_real_escape_string($connection, $_POST['email']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    if (empty($name) || empty($email) || empty($password)) {
-        die("All fields are required.");
-    }
-
-    $check = $connection->prepare("SELECT id FROM users WHERE email = ?");
-    $check->bind_param("s", $email);
-    $check->execute();
-    $check->store_result();
-
-    if ($check->num_rows > 0) {
-        echo "Email already registered.";
+    // Check if email or username exists
+    $check = mysqli_query($connection, "SELECT * FROM users WHERE email='$email' OR username='$username'");
+    if(mysqli_num_rows($check) > 0){
+        $error = "Username or Email already exists!";
     } else {
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $connection->prepare("INSERT INTO users (full_name, email, password_hash) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $email, $hashedPassword);
-
-        if ($stmt->execute()) {
-            echo "Signup successful! You can now log in.";
+        $insert = mysqli_query($connection, "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$password')");
+        if($insert){
+            // Redirect to login page with success message
+            header("Location: login.php?signup=success");
+            exit();
         } else {
-            echo "Error saving data: " . $connection->error;
+            $error = "Error creating account!";
         }
-        $stmt->close();
     }
-
-    $check->close();
 }
-$conn->close();
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sign Up</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100">
+<div class="card p-4 shadow" style="width: 400px;">
+    <h3 class="mb-3 text-center">Sign Up</h3>
+    <form method="POST">
+        <input type="text" name="username" placeholder="Username" class="form-control mb-2" required>
+        <input type="email" name="email" placeholder="Email" class="form-control mb-2" required>
+        <input type="password" name="password" placeholder="Password" class="form-control mb-3" required>
+        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+    </form>
+    <?php if(isset($error)) echo "<p class='text-danger mt-2'>$error</p>"; ?>
+    <p class="mt-3 text-center">Already have an account? <a href="login.php">Login</a></p>
+</div>
+</body>
+</html>

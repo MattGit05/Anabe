@@ -2,32 +2,40 @@
 session_start();
 include 'db_config/dbconn.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $email = mysqli_real_escape_string($connection, $_POST['email']);
+    $password = $_POST['password'];
 
-    $stmt = $connection->prepare("SELECT id, full_name, password_hash FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
+    $query = mysqli_query($connection, "SELECT * FROM users WHERE email='$email'");
+    $user = mysqli_fetch_assoc($query);
 
-    if ($stmt->num_rows === 1) {
-        $stmt->bind_result($id, $full_name, $hashedPassword);
-        $stmt->fetch();
-
-        if (password_verify($password, $hashedPassword)) {
-            $_SESSION['user_id'] = $id;
-            $_SESSION['user_name'] = $full_name;
-            header("Location:index.php");
-            exit();
-        } else {
-            echo "Invalid password.";
-        }
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['username'] = $user['username'];
+        header("Location: index.php");
+        exit();
     } else {
-        echo "No account found with that email.";
+        $error = "Invalid email or password!";
     }
-
-    $stmt->close();
 }
-$conn->close();
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100">
+<div class="card p-4 shadow" style="width: 400px;">
+    <h3 class="mb-3 text-center">Login</h3>
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email" class="form-control mb-2" required>
+        <input type="password" name="password" placeholder="Password" class="form-control mb-3" required>
+        <button type="submit" class="btn btn-success w-100">Login</button>
+    </form>
+    <?php if(isset($error)) echo "<p class='text-danger mt-2'>$error</p>"; ?>
+    <p class="mt-3 text-center">Don't have an account? <a href="signup.php">Sign Up</a></p>
+</div>
+</body>
+</html>
